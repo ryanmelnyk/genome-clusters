@@ -4,7 +4,7 @@ import os
 import subprocess
 
 db_path = "/usr2/people/melnyk/genomedb"
-max_files = 20000
+max_files = 50000
 
 print("Downloading RefSeq assembly summary from NCBI...")
 url = "https://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria"
@@ -61,7 +61,7 @@ for line in fh:
                 print(f"Processing genome #{i}: {id_name}...")
 
             dest = f"{db_path}/ncbi-refseq-raw/{id_name}.fna.gz"
-            
+
             full_name = os.path.basename(vals['ftp_path'])
             args = [
                 "curl",
@@ -72,13 +72,12 @@ for line in fh:
             ]
             proc = subprocess.Popen(args)
             proc.wait()
-            
+
             if os.stat(dest).st_size < 5000:
                 os.remove(dest)
                 print("\tDownload failed...skipping")
             else:
                 downloaded += 1
-
 
         else:
             pass
