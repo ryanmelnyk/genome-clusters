@@ -1,0 +1,8 @@
+work/
+tmp/*
+output/
+genomedb-metadata/
+.nextflow*
+*.csv
+*.html
+*.sh
