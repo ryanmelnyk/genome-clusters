@@ -2,7 +2,7 @@
 
 params.genomedb = "/usr2/people/melnyk/genomedb"
 params.busco_downloads = "/usr2/people/melnyk/data/busco_downloads"
-params.forks = 16
+params.forks = 8
 
 process stage_aws {
   cpus 1

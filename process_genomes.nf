@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
-params.file_limit = 1000
-params.file_collate = 10
+params.file_limit = 20000
+params.file_collate = 20
 
 include {
   stage_aws;

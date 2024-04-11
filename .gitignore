@@ -3,6 +3,7 @@ tmp/*
 output/
 genomedb-metadata/
 .nextflow*
+devnotes.md
 *.ipynb
 *.csv
 *.html
