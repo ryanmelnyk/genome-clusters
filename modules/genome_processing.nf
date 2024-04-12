@@ -2,7 +2,6 @@
 
 params.genomedb = "/usr2/people/melnyk/genomedb"
 params.busco_downloads = "/usr2/people/melnyk/data/busco_downloads"
-params.forks = 8
 
 process stage_aws {
   cpus 1
@@ -60,7 +59,7 @@ process download_and_qc {
   cpus 1
   memory '1.8 GB'
   conda '/usr2/people/melnyk/.conda/envs/genome-processing'
-  maxForks params.forks
+  maxForks params.cpus
   tag "download_genomes_${iter}"
   errorStrategy 'ignore'
 
@@ -76,8 +75,8 @@ process download_and_qc {
 
   for (g in genomes) {
     cmd += """
-    cp ${params.genomedb}/ncbi-refseq-raw/${g}.fna.gz .
-    gunzip ${g}.fna.gz
+    ln -s ${params.genomedb}/ncbi-refseq-raw/${g}.fna.gz .
+    gunzip -f ${g}.fna.gz
     busco \
       -i ${g}.fna \
       -l bacteria_odb10 \

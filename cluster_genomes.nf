@@ -1,6 +1,7 @@
 
-params.file_limit = 1000
+params.file_limit = 10000
 params.cpus = 16
+params.disk_cpus = 4
 params.initialize = false
 
 include {

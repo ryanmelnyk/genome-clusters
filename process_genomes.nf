@@ -2,6 +2,7 @@
 
 params.file_limit = 20000
 params.file_collate = 20
+params.cpus = 8
 
 include {
   stage_aws;

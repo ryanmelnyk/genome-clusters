@@ -49,11 +49,11 @@ process cluster_genomes {
 
   cmd += """
   parallel \
-    -j ${params.cpus} \
+    -j ${params.disk_cpus} \
     -a genomes.csv \
-    cp ${params.genomedb}/ncbi-refseq-raw/{} .
+    ln -s ${params.genomedb}/ncbi-refseq-raw/{} .
 
-  parallel -j ${params.cpus} gunzip ::: *.fna.gz
+  parallel -j ${params.disk_cpus} gunzip -f ::: *.fna.gz
 
   ls *.fna > fasta_list.txt
 
@@ -95,6 +95,8 @@ process cluster_genomes {
     -p ${params.cpus} \
     -l new_centroid_list.txt \
     -o new_centroids.msh
+
+  rm *.fna
   """
 
   if (!params.initialize) {
@@ -106,6 +108,7 @@ process cluster_genomes {
     
     cp combined_clusters.csv ${params.genomedb}/metadata/clusters.csv
     cp combined_centroids.msh ${params.genomedb}/metadata/centroids.msh
+    rm *.msh
     """
   }
 
@@ -113,6 +116,7 @@ process cluster_genomes {
   cmd += """
   cp combined_clusters.csv ${params.genomedb}/metadata/clusters.csv
   cp new_centroids.msh ${params.genomedb}/metadata/centroids.msh
+  rm *.msh
   """
   }
 
