@@ -4,7 +4,7 @@ output/
 genomedb-metadata/
 .nextflow*
 devnotes.md
-*.ipynb
+ipynb/*
 *.csv
 *.html
 *.sh
