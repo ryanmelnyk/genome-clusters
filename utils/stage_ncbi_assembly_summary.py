@@ -6,6 +6,10 @@ import subprocess
 db_path = "/usr2/people/melnyk/genomedb"
 max_files = 50000
 
+to_skip = [
+    "GCF_002158865.1"
+]
+
 print("Downloading RefSeq assembly summary from NCBI...")
 url = "https://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria"
 file = "assembly_summary.txt"
@@ -38,7 +42,6 @@ for line in open("tmp/genome_manifest.txt", 'r'):
     local_genomes.add(genome)
 print(f"Done! {len(local_genomes)} found in {db_path}")
 
-
 fh = open("tmp/assembly_summary.txt", 'r')
 fh.readline()
 header = fh.readline().rstrip().replace("#", "").split("\t")
@@ -49,8 +52,11 @@ for line in fh:
     if line.startswith("#"):
         continue
     else:
-        i += 1
         vals = dict(zip(header, line.rstrip().split("\t")))
+        if vals["assembly_accession"] in to_skip:
+            print(f'Skipping {vals["assembly_accession"]}! Blacklisted.')
+            continue
+        i += 1
         acc = vals["assembly_accession"].split(".")[0]
         if acc not in local_genomes:
             id_name = vals["assembly_accession"]
