@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 params.genomedb = "/usr2/people/melnyk/genomedb"
-params.tmpdir = "/usr2/people/melnyk/nf-work/tmp"
+params.tmpdir = "/usr2/people/melnyk/nf-work"
 
 process stage_genomes {
   cpus 1
@@ -37,29 +37,29 @@ process stage_genomes {
   cmd
 }
 
-// process stage_genomes_align_only {
-//   cpus 1
-//   memory '1.5 GB'
-//   conda '/usr2/people/melnyk/.conda/envs/my_base'
-//   tag "stage_genomes"
+process stage_genomes_align_only {
+  cpus 1
+  memory '1.5 GB'
+  conda '/usr2/people/melnyk/.conda/envs/my_base'
+  tag "stage_genomes"
 
-//   input:
+  input:
 
-//   output:
-//   path "genomes.csv", emit: csv
+  output:
+  path "genomes.csv", emit: csv
 
-//   script:
-//   """
-//   ls -l ${params.genomedb}/ncbi-refseq-raw > aws_manifest.txt
+  script:
+  """
+  ls -l ${params.genomedb}/ncbi-refseq-raw > aws_manifest.txt
 
-//   cp ${params.genomedb}/metadata/clusters.csv .
+  cp ${params.genomedb}/metadata/clusters.csv .
 
-//   ln -s ${params.genomedb}/metadata/gtdbtk_msa.faa .
+  ln -s ${params.genomedb}/metadata/gtdbtk_msa.faa .
 
-//   parse_genome_clusters_align_only.py ${params.file_limit}
-//   """
+  parse_genome_clusters_align_only.py ${params.file_limit}
+  """
 
-// }
+}
 
 
 process classify_genomes {
@@ -142,51 +142,46 @@ process classify_genomes {
   cmd
 }
 
-// process align_genomes {
-//   cpus params.cpus
-//   memory "60 GB"
-//   conda '/usr2/people/melnyk/.conda/envs/genome-classifying'
-//   tag { 'align_genomes' }
+process align_genomes {
+  cpus params.cpus
+  memory "60 GB"
+  conda '/usr2/people/melnyk/.conda/envs/genome-classifying'
+  tag { 'align_genomes' }
 
-//   input:
-//   path(genomes)
+  input:
+  path(genomes)
 
-//   output:
+  output:
 
-//   script:
-//   """
-//   aws s3 cp \
-//     ${aws_url}/metadata/gtdbtk_msa.faa \
-//     old_msa.faa
+  script:
+  """
+  cp ${params.genomedb}/metadata/gtdbtk_msa.faa old_msa.faa
 
-//   mkdir genomes
-//   parallel \
-//     -j ${params.cpus} \
-//     -a genomes.csv \
-//     aws s3 cp ${aws_url}/ncbi-refseq-raw/{} genomes
+  mkdir genomes
+  cat genomes.csv | xargs -I % ln -s ${params.genomedb}/ncbi-refseq-raw/% genomes
 
-//   gtdbtk identify \
-//     --genome_dir genomes \
-//     --out_dir identify \
-//     --cpus ${params.cpus} \
-//     --extension gz
+  gtdbtk identify \
+    --genome_dir genomes \
+    --out_dir identify \
+    --tmpdir ${params.tmpdir} \
+    --cpus ${params.cpus} \
+    --extension gz
 
-//   gtdbtk align \
-//     --identify_dir identify \
-//     --out_dir align \
-//     --skip_gtdb_refs \
-//     --cpus ${params.cpus}
+  gtdbtk align \
+    --identify_dir identify \
+    --out_dir align \
+    --tmpdir ${params.tmpdir} \
+    --skip_gtdb_refs \
+    --cpus ${params.cpus}
 
-//   mv align/align/gtdbtk.bac120.user_msa.fasta.gz new_msa.faa.gz
-//   gunzip new_msa.faa.gz
-//   cat old_msa.faa new_msa.faa > combined_msa.faa
+  mv align/align/gtdbtk.bac120.user_msa.fasta.gz new_msa.faa.gz
+  gunzip new_msa.faa.gz
+  cat old_msa.faa new_msa.faa > combined_msa.faa
 
-//   aws s3 cp \
-//      combined_msa.faa \
-//     ${aws_url}/metadata/gtdbtk_msa.faa
-//   """
+  cp combined_msa.faa ${params.genomedb}/metadata/gtdbtk_msa.faa
+  """
 
-// }
+}
 
 // process classify_genomes_custom {
 //   cpus params.cpus
