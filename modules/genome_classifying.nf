@@ -1,5 +1,6 @@
 #!/usr/bin/env nextflow
 params.genomedb = "/usr2/people/melnyk/genomedb"
+params.tmpdir = "/usr2/people/melnyk/nf-work/tmp"
 
 process stage_genomes {
   cpus 1
@@ -53,7 +54,7 @@ process stage_genomes {
 
 //   cp ${params.genomedb}/metadata/clusters.csv .
 
-//   cp ${params.genomedb}/metadata/gtdbtk_msa.faa .
+//   ln -s ${params.genomedb}/metadata/gtdbtk_msa.faa .
 
 //   parse_genome_clusters_align_only.py ${params.file_limit}
 //   """
@@ -90,18 +91,21 @@ process classify_genomes {
   gtdbtk identify \
     --genome_dir genomes \
     --out_dir identify \
+    --tmpdir ${params.tmpdir} \
     --cpus ${params.cpus} \
     --extension gz
 
   gtdbtk align \
     --identify_dir identify \
     --out_dir align \
+    --tmpdir ${params.tmpdir} \
     --skip_gtdb_refs \
     --cpus ${params.cpus}
 
   gtdbtk classify \
     --genome_dir genomes \
     --out_dir classify \
+    --tmpdir ${params.tmpdir} \
     --align_dir align \
     --skip_ani_screen \
     --extension gz \
