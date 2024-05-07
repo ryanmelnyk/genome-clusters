@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 params.genomedb = "/usr2/people/melnyk/genomedb"
-params.tmpdir = "/usr2/people/melnyk/nf-work"
+params.tmpdir = "/usr2/people/melnyk/nf-work/genome-clusters"
 
 process stage_genomes {
   cpus 1
@@ -183,64 +183,82 @@ process align_genomes {
 
 }
 
-// process classify_genomes_custom {
-//   cpus params.cpus
-//   memory "60 GB"
-//   conda '/usr2/people/melnyk/.conda/envs/genome-classifying'
-//   tag { 'cluster_genomes' }
+process classify_genomes_custom {
+  cpus params.cpus
+  memory "60 GB"
+  conda '/usr2/people/melnyk/.conda/envs/genome-classifying'
+  tag { 'classify_custom_genomes' }
 
-//   input:
-//   path(genomes)
+  input:
+  path(genomes)
 
-//   output:
+  output:
 
-//   script:
-//   """
-//   mkdir genomes
-//   mv *.fna genomes
-//   aws s3 cp \
-//     ${aws_url}/metadata/custom_msa.faa \
-//     old_msa.faa
+  script:
+  cmd = ""
 
-//   aws s3 cp \
-//     ${aws_url}/metadata/custom_taxonomy.tsv \
-//     old_tax.tsv
+  if (!params.initialize) {
+    cmd += """
+    cp ${params.genomedb}/metadata/custom_msa.faa old_msa.faa
 
-//   gtdbtk identify \
-//     --genome_dir genomes \
-//     --out_dir identify \
-//     --cpus ${params.cpus} \
-//     --extension fna
+    cp ${params.genomedb}/metadata/custom_taxonomy.tsv old_tax.tsv
+    """
+  }
 
-//   gtdbtk align \
-//     --identify_dir identify \
-//     --out_dir align \
-//     --skip_gtdb_refs \
-//     --cpus ${params.cpus}
+  cmd += """
+  mkdir genomes
+  mv *.fna genomes
 
-//   gtdbtk classify \
-//     --genome_dir genomes \
-//     --out_dir classify \
-//     --align_dir align \
-//     --extension fna \
-//     --cpus ${params.cpus}
+  gtdbtk identify \
+    --genome_dir genomes \
+    --out_dir identify \
+    --tmpdir ${params.tmpdir} \
+    --cpus ${params.cpus} \
+    --extension fna
 
-//   mv align/align/gtdbtk.bac120.user_msa.fasta.gz new_msa.faa.gz
-//   gunzip new_msa.faa.gz
+  gtdbtk align \
+    --identify_dir identify \
+    --out_dir align \
+    --tmpdir ${params.tmpdir} \
+    --skip_gtdb_refs \
+    --cpus ${params.cpus}
 
-//   cat old_msa.faa new_msa.faa > combined_msa.faa
+  gtdbtk classify \
+    --genome_dir genomes \
+    --out_dir classify \
+    --tmpdir ${params.tmpdir} \
+    --align_dir align \
+    --skip_ani_screen \
+    --extension fna \
+    --cpus ${params.cpus}
+  """
 
-//   mv classify/classify/gtdbtk.bac120.summary.tsv new_tax.tsv
-//   combine_tax.py
+  if (!params.initialize) {
+    cmd += """
+    mv align/align/gtdbtk.bac120.user_msa.fasta.gz new_msa.faa.gz
+    gunzip new_msa.faa.gz
+    cat old_msa.faa new_msa.faa > combined_msa.faa
 
-//   aws s3 cp \
-//     combined_msa.faa \
-//     ${aws_url}/metadata/custom_msa.faa
+    mv classify/classify/gtdbtk.bac120.summary.tsv new_tax.tsv
 
-//   aws s3 cp \
-//     combined_tax.tsv \
-//     ${aws_url}/metadata/custom_taxonomy.tsv
+    combine_tax.py
 
-//   """
+    cp combined_msa.faa ${params.genomedb}/metadata/custom_msa.faa
 
-// }
+    cp combined_tax.tsv ${params.genomedb}/metadata/custom_taxonomy.tsv
+    """
+  }
+
+  if (params.initialize) {
+    cmd += """
+    mv align/align/gtdbtk.bac120.user_msa.fasta.gz new_msa.faa.gz
+    gunzip new_msa.faa.gz
+
+    cp new_msa.faa ${params.genomedb}/metadata/custom_msa.faa
+    mv classify/classify/gtdbtk.bac120.summary.tsv new_tax.tsv
+    cp new_tax.tsv ${params.genomedb}/metadata/custom_taxonomy.tsv
+    """
+  }
+
+  cmd
+}
