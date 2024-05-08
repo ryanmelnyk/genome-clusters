@@ -38,7 +38,7 @@ for line in open("tmp/genome_manifest.txt", 'r'):
     # parses genome id without looking at version number
     if line.startswith("total"):
         continue
-    genome = line.rstrip().split()[-1].split(".")[0]
+    genome = line.rstrip().split()[-1].split(".")[0].split("_")[1]
     local_genomes.add(genome)
 print(f"Done! {len(local_genomes)} found in {db_path}")
 
@@ -57,7 +57,7 @@ for line in fh:
             print(f'Skipping {vals["assembly_accession"]}! Blacklisted.')
             continue
         i += 1
-        acc = vals["assembly_accession"].split(".")[0]
+        acc = vals["assembly_accession"].split(".")[0].split("_")[1]
         if acc not in local_genomes:
             id_name = vals["assembly_accession"]
             if os.path.basename(vals['ftp_path']) == "na":
