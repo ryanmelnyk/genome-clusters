@@ -47,10 +47,8 @@ faa_failed = 0
 gff_failed = 0
 
 for acc in accs:
-    print(acc)
     full_name = os.path.basename(accs[acc])
     if acc not in faa:
-        print("\tDownloading FAA...")
         dest = f"{db_path}/ncbi-faa/{acc}.faa.gz"
         args = [
             "curl",
@@ -63,7 +61,7 @@ for acc in accs:
         proc.wait()
         if os.stat(dest).st_size < 5000:
             os.remove(dest)
-            print("\tDownload failed...skipping")
+            print(f"\tDownload failed for {acc}...skipping")
             faa_failed += 1
         else:
             faa_downloaded += 1
@@ -71,7 +69,6 @@ for acc in accs:
         faa_found += 1
 
     if acc not in gff:
-        print("\tDownloading GFF...")
         dest = f"{db_path}/ncbi-gff/{acc}.gff.gz"
         
         args = [
@@ -85,7 +82,7 @@ for acc in accs:
         proc.wait()
         if os.stat(dest).st_size < 5000:
             os.remove(dest)
-            print("\tDownload failed...skipping")
+            print(f"\tDownload failed for {acc}...skipping")
             gff_failed += 1
         else:
             gff_downloaded += 1
@@ -100,10 +97,10 @@ for x in accs:
     if accs[x] == None:
         print(f"\t{x} URL missing!")
 
-print(f"{faa_found} FAA files found in {dbpath}.")
+print(f"{faa_found} FAA files found in {db_path}.")
 print(f"{faa_downloaded} FAA files downloaded.")
 print(f"{faa_failed} FAA files failed to download.")
 
-print(f"{gff_found} GFF files found in {dbpath}.")
+print(f"{gff_found} GFF files found in {db_path}.")
 print(f"{gff_downloaded} GFF files downloaded.")
 print(f"{gff_failed} GFF files failed to download.")
