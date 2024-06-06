@@ -45,8 +45,14 @@ faa_found = 0
 gff_found = 0
 faa_failed = 0
 gff_failed = 0
+url_missing = 0
 
+o = open("tmp/failed_accessions.txt", 'w')
 for acc in accs:
+    if accs[acc] == None:
+        print(f"No URL found for {acc}!")
+        o.write(f"No URL found for {acc}!\n")
+        continue
     full_name = os.path.basename(accs[acc])
     if acc not in faa:
         dest = f"{db_path}/ncbi-faa/{acc}.faa.gz"
@@ -60,8 +66,12 @@ for acc in accs:
         proc = subprocess.Popen(args)
         proc.wait()
         if os.stat(dest).st_size < 5000:
-            os.remove(dest)
+            try:
+                os.remove(dest)
+            except FileNotFoundError:
+                pass    
             print(f"\tDownload failed for {acc}...skipping")
+            o.write(f"\tDownload failed for {acc}...skipping\n")
             faa_failed += 1
         else:
             faa_downloaded += 1
@@ -83,6 +93,7 @@ for acc in accs:
         if os.stat(dest).st_size < 5000:
             os.remove(dest)
             print(f"\tDownload failed for {acc}...skipping")
+            o.write(f"\tDownload failed for {acc}...skipping\n")
             gff_failed += 1
         else:
             gff_downloaded += 1
@@ -104,3 +115,4 @@ print(f"{faa_failed} FAA files failed to download.")
 print(f"{gff_found} GFF files found in {db_path}.")
 print(f"{gff_downloaded} GFF files downloaded.")
 print(f"{gff_failed} GFF files failed to download.")
+o.close()
