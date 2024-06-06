@@ -2,7 +2,7 @@
 
 params.genomedb = "/usr2/people/melnyk/genomedb"
 
-process diamond_mcl_gradient {
+process diamond_mcl_inf_gradient {
   cpus params.cpus
   memory '8 GB'
   conda '/usr2/people/melnyk/.conda/envs/pirate'
@@ -20,7 +20,7 @@ process diamond_mcl_gradient {
   parallel -j ${params.cpus} gunzip -f ::: *.faa.gz
 
   nstrains=\$(ls | grep ".faa" | wc -l)
-  echo \$((\$nstrains*5))
+  echo \$((\$nstrains*10))
 
   rename_faa.py
 
@@ -47,7 +47,7 @@ process diamond_mcl_gradient {
     -t tmp \
     -o diamond.m8 \
     -f tab \
-    --max-target-seqs \$((\$nstrains*5)) \
+    --max-target-seqs \$((\$nstrains*10)) \
     --min-score 50 \
     --threads ${params.cpus}
 
