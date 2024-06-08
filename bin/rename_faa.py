@@ -5,19 +5,16 @@
 
 from Bio import SeqIO
 import os
+import sys
 
 o = open("combined.faa", 'w')
 
-for f in os.listdir("."):
-    if f == "combined.faa":
-        continue
-    
-    if f.endswith(".faa"):
-        acc = f.replace(".faa", "")
-        for seq in SeqIO.parse(open(f, 'r'), 'fasta'):
-            seq.id  = f"{seq.id}|{acc}"
-            SeqIO.write(seq, o, 'fasta')
-o.close()        
+for line in open(sys.argv[1], 'r'):
+    acc = line.rstrip()
+    for seq in SeqIO.parse(open(f"{acc}.faa", 'r'), 'fasta'):
+        seq.id  = f"{seq.id}|{acc}"
+        SeqIO.write(seq, o, 'fasta')
+o.close()
 
 
     

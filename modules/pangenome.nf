@@ -20,34 +20,35 @@ process diamond_mcl_inf_gradient {
   parallel -j ${params.cpus} gunzip -f ::: *.faa.gz
 
   nstrains=\$(ls | grep ".faa" | wc -l)
-  echo \$((\$nstrains*10))
+  echo \$((\$nstrains*2))
 
-  rename_faa.py
-
-  cd-hit \
-    -M 8000 \
-    -T ${params.cpus} \
-    -c 0.95 \
-    -i combined.faa \
-    -d 0 \
-    -l 50 \
-    -o clustered.faa
+  rename_faa.py genomes.txt
 
   cat genomes.txt | xargs -I % rm %.faa
 
+  mmseqs easy-linclust \
+    combined.faa \
+    mmseqs95 \
+    tmp_mmseqs \
+    --threads ${params.cpus} \
+    --split-memory-limit 200G \
+    --min-seq-id 0.95 \
+    -c 0.95 \
+    --cov-mode 0
+
   diamond makedb \
-    --in clustered.faa \
+    --in mmseqs95_rep_seq.fasta \
     -d clustered.dmnd \
     --threads ${params.cpus}
 
-  mkdir tmp
+  mkdir tmp_dmnd
   diamond blastp \
-    --query clustered.faa \
+    --query mmseqs95_rep_seq.fasta \
     -d clustered.dmnd \
-    -t tmp \
+    -t tmp_dmnd \
     -o diamond.m8 \
     -f tab \
-    --max-target-seqs \$((\$nstrains*10)) \
+    --max-target-seqs \$((\$nstrains*2)) \
     --min-score 50 \
     --threads ${params.cpus}
 

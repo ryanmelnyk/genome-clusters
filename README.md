@@ -281,6 +281,8 @@ mamba install \
     pirate \
     -n pirate
 
+mamba install -c conda-forge -c bioconda mmseqs2 -n pirate
+
 conda activate pirate
 pip install Bio
 ```

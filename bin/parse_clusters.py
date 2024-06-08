@@ -5,28 +5,17 @@
 import re
 import sys
 
-cd_clusters = {}
+mm_clusters = {}
 
-cluster = "NA"
-centroid = "NA"
-others = []
-
-gene_re = ", >(.*)\.\.\. "
-
-for line in open("clustered.faa.clstr"):
-    if line.startswith(">"):
-        vals = line.rstrip().split()
-        if cluster != "NA":
-            cd_clusters[centroid] = others
-        cluster = int(vals[-1])
-        centroid = "NA"
-        others = []
+for line in open("mmseqs95_cluster.tsv"):
+    vals = line.rstrip().split("\t")
+    if vals[0] == vals[1]:
+        continue
     else:
-        gene = re.search(gene_re, line.rstrip()).group(1)
-        if line.rstrip().endswith("*"):
-            centroid = gene
+        if vals[0] in mm_clusters:
+            mm_clusters[vals[0]].append(vals[1])
         else:
-            others.append(gene)
+            mm_clusters[vals[0]] = [vals[1]]
 
 genomes = [line.rstrip() for line in open("genomes.txt", 'r')]
 genome_string = "\t".join(genomes)
@@ -38,6 +27,7 @@ o.write(f"group_id\t{genome_string}\n")
 p = open(f"counts.{tag}.csv", 'w')
 p.write(f"group_id\t{genome_string}\n")
 
+mm_found = set()
 cluster = 1
 for line in open(sys.argv[1], 'r'):
     this_cluster = {g: [] for g in genomes}
@@ -45,9 +35,11 @@ for line in open(sys.argv[1], 'r'):
     for x in line.rstrip().split("\t"):
         vals = x.split("|")
         this_cluster[vals[1]].append(vals[0])
-        for y in cd_clusters[x]:
-            vals = y.split("|")
-            this_cluster[vals[1]].append(vals[0])
+        if x in mm_clusters:
+            mm_found.add(x)
+            for y in mm_clusters[x]:
+                vals = y.split("|")
+                this_cluster[vals[1]].append(vals[0])
     tags = []
     counts = []
     for g in genomes:
@@ -62,6 +54,30 @@ for line in open(sys.argv[1], 'r'):
     o.write(f"{cluster_id}\t{tagstring}\n")
     p.write(f"{cluster_id}\t{countstring}\n")
     cluster += 1
+# dump mmseqs clusters as a group if they didn't show up in mcl output 
+for mm in mm_clusters:
+    if mm not in mm_found:
+        this_cluster = {g: [] for g in genomes}
+        cluster_id = f"group_{cluster:06d}"
+        this_cluster[mm.split("|")[1]].append(mm.split("|")[0])
+        for x in mm_clusters[mm]:
+            vals = x.split("|")
+            this_cluster[vals[1]].append(vals[0])
+        tags = []
+        counts = []
+        for g in genomes:
+            if len(this_cluster[g]) == 0:
+                tags.append("None")
+                counts.append(0)
+            else:
+                tags.append(",".join(this_cluster[g]))
+                counts.append(len(this_cluster[g]))
+        tagstring = "\t".join(tags)
+        countstring = "\t".join([str(x) for x in counts])
+        o.write(f"{cluster_id}\t{tagstring}\n")
+        p.write(f"{cluster_id}\t{countstring}\n")
+        cluster += 1
+        
 o.close()
 p.close()
 

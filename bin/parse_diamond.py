@@ -6,7 +6,7 @@ from Bio import SeqIO
 
 seqlens = {}
 
-for seq in SeqIO.parse(open("clustered.faa", 'r'), 'fasta'):
+for seq in SeqIO.parse(open("mmseqs95_rep_seq.fasta", 'r'), 'fasta'):
     seqlens[seq.id] = len(seq)
 
 o = open("input.abc", 'w')
