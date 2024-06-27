@@ -52,10 +52,11 @@ process diamond_mcl_inf_gradient {
     --min-score 50 \
     --threads ${params.cpus}
 
-  parse_diamond.py
+  parse_diamond.py mmseqs95_rep_seq.fasta diamond.m8
 
   mcxload \
     --stream-mirror \
+    --write-binary \
     -abc input.abc \
     -o data.mci \
     -write-tab data.tab
@@ -78,14 +79,14 @@ process diamond_mcl_inf_gradient {
   mcxdump -imx data.mci -icl out.data.mci.I60 -tabr data.tab -o clusters.I60.txt
   mcxdump -imx data.mci -icl out.data.mci.I80 -tabr data.tab -o clusters.I80.txt
 
-  parse_clusters.py clusters.I12.txt
-  parse_clusters.py clusters.I14.txt
-  parse_clusters.py clusters.I16.txt
-  parse_clusters.py clusters.I18.txt
-  parse_clusters.py clusters.I20.txt
-  parse_clusters.py clusters.I40.txt
-  parse_clusters.py clusters.I60.txt
-  parse_clusters.py clusters.I80.txt
+  parse_clusters.py clusters.I12.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I14.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I16.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I18.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I20.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I40.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I60.txt mmseqs95_cluster.tsv
+  parse_clusters.py clusters.I80.txt mmseqs95_cluster.tsv
   """
 
 }

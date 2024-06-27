@@ -3,14 +3,15 @@
 # Ryan A. Melnyk - RAMelnyk@lbl.gov
 
 from Bio import SeqIO
+import sys
 
 seqlens = {}
 
-for seq in SeqIO.parse(open("mmseqs95_rep_seq.fasta", 'r'), 'fasta'):
+for seq in SeqIO.parse(open(sys.argv[1], 'r'), 'fasta'):
     seqlens[seq.id] = len(seq)
 
 o = open("input.abc", 'w')
-for line in open("diamond.m8", "r"):
+for line in open(sys.argv[2], "r"):
     vals = line.rstrip().split("\t")
     if vals[0] == vals[1]:
         continue
