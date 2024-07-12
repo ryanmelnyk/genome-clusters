@@ -60,7 +60,7 @@ for line in open(sys.argv[1], 'r'):
             counts.append(str(len(this_cluster[g])))
             gene_count += len(this_cluster[g])
     tagstring = "\t".join(tags)
-    countstring = "\t".join(counts)
+    countstring = "\t".join([str(x) for x in counts])
     o.write(f"{cluster_id}\t{tagstring}\n")
     p.write(f"{cluster_id}\t{countstring}\n")
     print(f"\t{cluster_id}: {str(gene_count)} genes...")
@@ -78,25 +78,21 @@ for mm in mm_clusters:
         for x in mm_clusters[mm]:
             vals = x.split("|")
             this_cluster[vals[1]].append(vals[0])
-        tagstring = cluster_id
-        countstring = cluster_id
         gene_count = 0
+        tags = []
+        counts = []
         for g in genomes:
             if len(this_cluster[g]) == 0:
-                tagstring += "\tNone"
-                countstring += "\t0"
+                tags.append("None")
+                counts.append("0")
             else:
-                tagstring += "\t"
-                countstring += "\t"
-                tagstring += ",".join(this_cluster[g])
-                countstring += str(len(this_cluster[g]))
+                tags.append(",".join(this_cluster[g]))
+                counts.append(str(len(this_cluster[g])))
                 gene_count += len(this_cluster[g])
         tagstring = "\t".join(tags)
         countstring = "\t".join([str(x) for x in counts])
-        tagstring += "\n"
-        countstring += "\n"
-        o.write(tagstring)
-        p.write(countstring)
+        o.write(f"{cluster_id}\t{tagstring}\n")
+        p.write(f"{cluster_id}\t{countstring}\n")
         print(f"\t{cluster_id}: {str(gene_count)} genes...")
         cluster += 1
         
