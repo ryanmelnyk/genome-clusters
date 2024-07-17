@@ -72,7 +72,7 @@ print(f"\n{cluster} total clusters in MCL data!")
 print("Finding any mmseqs clusters not in mcl data...")
 for mm in mm_clusters:
     if mm not in mm_found:
-        cluster_id = f"group_{cluster:07d}"
+        cluster_id = f"group_{cluster:06d}"
         this_cluster = defaultdict(list)
         this_cluster[mm.split("|")[1]].append(mm.split("|")[0])
         for x in mm_clusters[mm]:
