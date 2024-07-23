@@ -55,7 +55,7 @@ for o in orthos:
             print(o)
             sys.exit()
     if count % 10 == 0:
-        print(f"{count} genomes processed...")
+        print(f"{count} orthologs processed...")
     else:
         pass
 print("Done!")
